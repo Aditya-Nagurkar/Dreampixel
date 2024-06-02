@@ -6,8 +6,12 @@ from io import BytesIO
 # Streamlit UI setup
 st.title("Dreampixel: Your Gateway To Limitless Visual Creativity!")
 
-# Prompt input from user
-input_text = st.text_input("Enter your prompt to generate an image:")
+# Form for input and button
+with st.form(key='image_generation_form'):
+    # Prompt input from user
+    input_text = st.text_input("Enter your prompt to generate an image:")
+    # Submit button
+    submit_button = st.form_submit_button(label='Generate Image')
 
 # Session state to store the image and its byte data
 if 'image' not in st.session_state:
@@ -17,7 +21,7 @@ if 'image_bytes' not in st.session_state:
 if 'downloaded' not in st.session_state:
     st.session_state.downloaded = False
 
-if st.button("Generate Image", use_container_width=True):
+if submit_button:
     if input_text:
         # Reset the download state
         st.session_state.downloaded = False
