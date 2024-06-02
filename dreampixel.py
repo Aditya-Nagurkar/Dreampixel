@@ -11,7 +11,7 @@ with st.form(key='image_generation_form'):
     # Prompt input from user
     input_text = st.text_input("Enter your prompt to generate an image:")
     # Submit button
-    submit_button = st.form_submit_button(label='Generate Image')
+    submit_button = st.form_submit_button(label='Generate Image',use_container_width=True)
 
 # Session state to store the image and its byte data
 if 'image' not in st.session_state:
