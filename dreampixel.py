@@ -30,7 +30,7 @@ if submit_button:
         with st.spinner("Generating image..."):
             # Send a POST request to the model endpoint
             response = requests.post(
-                "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1",
+                "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-3-medium",
                 headers={"Authorization": "Bearer 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"},
                 json={"inputs": input_text}
             )
