@@ -31,7 +31,7 @@ if submit_button:
             # Send a POST request to the model endpoint
             response = requests.post(
                 "https://api.stability.ai/v2beta/stable-image/generate/3",
-                headers={"Authorization": "Bearer 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"},
+                headers={"Authorization": "Bearer sk-uZZbuwhuvKKIUWDaXnu3DE89FtCsVg2Pib4Mj42jrLy2YErJ"},
                 json={"inputs": input_text}
             )
 
