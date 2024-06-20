@@ -30,7 +30,7 @@ if submit_button:
         with st.spinner("Generating image..."):
             # Send a POST request to the model endpoint
             response = requests.post(
-                "https://api.stability.ai/v2beta/stable-image/generate/core",
+                "https://api.stability.ai/v2beta/stable-image/generate/ultra",
                 headers={"Authorization": "Bearer sk-uZZbuwhuvKKIUWDaXnu3DE89FtCsVg2Pib4Mj42jrLy2YErJ"},
                 json={"inputs": input_text}
             )
