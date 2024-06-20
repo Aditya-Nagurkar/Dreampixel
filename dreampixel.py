@@ -31,7 +31,7 @@ if submit_button:
             # Send a POST request to the model endpoint
             response = requests.post(
                 "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-3-medium-diffusers",
-                headers={"Authorization": "Bearer sk-uZZbuwhuvKKIUWDaXnu3DE89FtCsVg2Pib4Mj42jrLy2YErJ"},
+                headers={"Authorization": "Bearer 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"},
                 json={"inputs": input_text}
             )
 
