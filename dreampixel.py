@@ -30,7 +30,7 @@ if submit_button:
         with st.spinner("Generating image..."):
             # Send a POST request to the model endpoint
             response = requests.post(
-                "https://api-inference.huggingface.co/models/h94/IP-Adapter-FaceID",
+                "https://api-inference.huggingface.co/models/SG161222/Realistic_Vision_V4.0_noVAE",
                 headers={"Authorization": "Bearer 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"},
                 json={"inputs": input_text}
             )
