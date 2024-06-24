@@ -40,18 +40,20 @@ if submit_button:
         col1, col2 = st.columns(2)
         for i in range(4):
             with col1 if i < 2 else col2:
-                st.image(images[i], caption=f"Generated Image {i+1}", use_column_width=True)
-                # Convert image to bytes
-                img_bytes = BytesIO()
-                images[i].save(img_bytes, format='PNG')
-                # Download button for each image
-                if st.download_button(
-                    label=f"Download Image {i+1}",
-                    data=img_bytes.getvalue(),
-                    file_name=f"generated_image_{i+1}.png",
-                    mime="image/png",
-                    key=f"download_button_{i+1}"
-                ):
-                    st.info(f"Image {i+1} downloaded successfully!")
+                # Show image and download button only if clicked
+                if st.button(f"Image {i+1}"):
+                    st.image(images[i], caption=f"Generated Image {i+1}", use_column_width=True)
+                    # Convert image to bytes
+                    img_bytes = BytesIO()
+                    images[i].save(img_bytes, format='PNG')
+                    # Download button for this image
+                    if st.download_button(
+                        label=f"Download Image {i+1}",
+                        data=img_bytes.getvalue(),
+                        file_name=f"generated_image_{i+1}.png",
+                        mime="image/png",
+                        key=f"download_button_{i+1}"
+                    ):
+                        st.info(f"Image {i+1} downloaded successfully!")
     else:
         st.warning("Please enter a prompt to generate images.")
