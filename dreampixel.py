@@ -67,12 +67,14 @@ if submit_button:
                 with col:
                     if st.button(f"Select Image {i+1}", key=f"select_button_{i}"):
                         st.session_state.selected_image_index = i
+                        st.write(f"Selected Image Index: {i}")
                     st.image(image, caption=f"Image {i+1}", use_column_width=True)
 
 # Display the selected image in original size
 if st.session_state.selected_image_index is not None:
     st.write("### Selected Image")
     selected_image = st.session_state.images[st.session_state.selected_image_index]
+    st.write(f"Displaying selected image index: {st.session_state.selected_image_index}")
     st.image(selected_image, use_column_width=True)
 
     # Display the download button if an image is available and it hasn't been downloaded yet
