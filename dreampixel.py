@@ -72,7 +72,8 @@ if submit_button:
 # Display the selected image in original size
 if st.session_state.selected_image_index is not None:
     st.write("### Selected Image")
-    st.image(st.session_state.images[st.session_state.selected_image_index], use_column_width=True)
+    selected_image = st.session_state.images[st.session_state.selected_image_index]
+    st.image(selected_image, use_column_width=True)
 
     # Display the download button if an image is available and it hasn't been downloaded yet
     if not st.session_state.downloaded:
