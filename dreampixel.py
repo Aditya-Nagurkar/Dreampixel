@@ -11,7 +11,7 @@ with st.form(key='image_generation_form'):
     # Prompt input from user
     input_text = st.text_input("Enter your prompt to generate an image:")
     # Submit button
-    submit_button = st.form_submit_button(label='Generate Image',use_container_width=True)
+    submit_button = st.form_submit_button(label='Generate Image', use_container_width=True)
 
 # Session state to store the image and its byte data
 if 'image' not in st.session_state:
@@ -42,12 +42,29 @@ if submit_button:
                 # Open the image using PIL
                 st.session_state.image = Image.open(BytesIO(st.session_state.image_bytes))
 
-                # Display the image in the Streamlit app
+                # Display the image in the Streamlit app with default size
                 st.image(st.session_state.image, caption="Generated Image", use_column_width=True)
             else:
                 st.error(f"Request failed with status code: {response.status_code}")
     else:
         st.warning("Please enter a prompt to generate an image.")
+
+# Display size options if an image is available
+if st.session_state.image:
+    st.write("Choose image size:")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        if st.button("Small"):
+            st.image(st.session_state.image, caption="Generated Image - Small", width=200)
+    with col2:
+        if st.button("Medium"):
+            st.image(st.session_state.image, caption="Generated Image - Medium", width=400)
+    with col3:
+        if st.button("Large"):
+            st.image(st.session_state.image, caption="Generated Image - Large", width=600)
+    with col4:
+        if st.button("Original"):
+            st.image(st.session_state.image, caption="Generated Image - Original", use_column_width=True)
 
 # Display the download button if an image is available and it hasn't been downloaded yet
 if st.session_state.image and not st.session_state.downloaded:
