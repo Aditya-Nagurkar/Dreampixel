@@ -2,7 +2,6 @@ import streamlit as st
 import requests
 from PIL import Image
 from io import BytesIO
-import base64
 
 # Streamlit UI setup
 st.title("Dreampixel: Your Gateway To Limitless Visual Creativity!")
@@ -58,7 +57,8 @@ if submit_button:
         if len(st.session_state.images) == 4:
             cols = st.columns(2)
             for i, image in enumerate(st.session_state.images):
-                with cols[i % 2]:
+                col = cols[i % 2]
+                with col:
                     if st.button(f"Select Image {i+1}", key=f"select_button_{i}"):
                         st.session_state.selected_image_index = i
                     st.image(image, caption=f"Image {i+1}", use_column_width=True)
