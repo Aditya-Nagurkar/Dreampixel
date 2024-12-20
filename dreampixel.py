@@ -3,6 +3,7 @@ import requests
 from PIL import Image
 from io import BytesIO
 import time
+import json
 
 # Configure page settings
 st.set_page_config(
@@ -30,20 +31,60 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Cache the API call to prevent repeated calls
+def query_api_with_retry(payload, max_retries=5, initial_wait=5):
+    """Query the API with retry logic for rate limits"""
+    headers = {"Authorization": f"Bearer {API_KEY}"}
+    
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(
+                API_URL,
+                headers=headers,
+                json=payload,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                return response.content
+            
+            # Handle rate limiting
+            elif response.status_code == 429:
+                wait_time = initial_wait * (2 ** attempt)  # Exponential backoff
+                st.warning(f"Rate limit reached. Waiting {wait_time} seconds before retry...")
+                time.sleep(wait_time)
+                continue
+            
+            # Model still loading
+            elif response.status_code == 503:
+                response_json = response.json()
+                if "estimated_time" in response_json:
+                    wait_time = response_json["estimated_time"]
+                    st.warning(f"Model is loading. Waiting {wait_time:.1f} seconds...")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    time.sleep(5)  # Default wait if no estimate provided
+                    continue
+                    
+            else:
+                response.raise_for_status()
+                
+        except requests.exceptions.RequestException as e:
+            if attempt == max_retries - 1:  # Last attempt
+                raise Exception(f"Failed after {max_retries} attempts. Error: {str(e)}")
+            time.sleep(initial_wait)
+            continue
+            
+    raise Exception(f"Failed after {max_retries} attempts due to rate limiting")
+
 @st.cache_data(ttl=3600, show_spinner=False)
 def generate_single_image(prompt, variation_number):
-    """Generate a single image with error handling"""
+    """Generate a single image with error handling and retries"""
     try:
-        response = requests.post(
-            API_URL,
-            headers={"Authorization": f"Bearer {API_KEY}"},
-            json={"inputs": f"{prompt} Variation {variation_number}"},
-            timeout=30
-        )
-        response.raise_for_status()
-        return Image.open(BytesIO(response.content))
-    except requests.exceptions.RequestException as e:
+        payload = {"inputs": f"{prompt} Variation {variation_number}"}
+        image_bytes = query_api_with_retry(payload)
+        return Image.open(BytesIO(image_bytes))
+    except Exception as e:
         st.error(f"Error generating image {variation_number}: {str(e)}")
         return None
 
@@ -59,7 +100,7 @@ def generate_images(prompt, num_images=4):
         if image:
             images.append(image)
         progress_bar.progress((i + 1) / num_images)
-        time.sleep(0.1)  # Prevent rate limiting
+        time.sleep(2)  # Increased delay between requests to prevent rate limiting
     
     status_text.empty()
     progress_bar.empty()
@@ -87,7 +128,7 @@ def main():
         )
         
         # Number of images selector
-        num_images = st.slider("Number of variations", min_value=1, max_value=4, value=4)
+        num_images = st.slider("Number of variations", min_value=1, max_value=4, value=2)  # Default reduced to 2
         
         # Submit button
         submit_button = st.form_submit_button(
@@ -101,7 +142,7 @@ def main():
             st.warning("Please enter a prompt to generate images.")
         else:
             try:
-                with st.spinner("🎨 Creating your masterpiece..."):
+                with st.spinner("🎨 Creating your masterpiece... This might take a minute."):
                     st.session_state.generated_images = generate_images(
                         input_text,
                         num_images
@@ -118,9 +159,9 @@ def main():
         for idx, image in enumerate(st.session_state.generated_images):
             with cols[idx % 2]:
                 st.image(
-                    image, 
-                    caption=f"Variation {idx+1}", 
-                    use_container_width=True  # Updated from use_column_width
+                    image,
+                    caption=f"Variation {idx+1}",
+                    use_container_width=True
                 )
                 
                 # Create download button for each image
