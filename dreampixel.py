@@ -11,6 +11,10 @@ st.set_page_config(
     layout="wide"
 )
 
+# API Configuration
+API_KEY = "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"
+API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
+
 # Custom CSS to improve the UI
 st.markdown("""
     <style>
@@ -28,14 +32,14 @@ st.markdown("""
 
 # Cache the API call to prevent repeated calls
 @st.cache_data(ttl=3600, show_spinner=False)
-def generate_single_image(prompt, api_key, variation_number):
+def generate_single_image(prompt, variation_number):
     """Generate a single image with error handling"""
     try:
         response = requests.post(
-            "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
-            headers={"Authorization": f"Bearer {api_key}"},
+            API_URL,
+            headers={"Authorization": f"Bearer {API_KEY}"},
             json={"inputs": f"{prompt} Variation {variation_number}"},
-            timeout=30  # Add timeout
+            timeout=30
         )
         response.raise_for_status()
         return Image.open(BytesIO(response.content))
@@ -43,7 +47,7 @@ def generate_single_image(prompt, api_key, variation_number):
         st.error(f"Error generating image {variation_number}: {str(e)}")
         return None
 
-def generate_images(prompt, api_key, num_images=4):
+def generate_images(prompt, num_images=4):
     """Generate multiple images with progress tracking"""
     images = []
     progress_bar = st.progress(0)
@@ -51,7 +55,7 @@ def generate_images(prompt, api_key, num_images=4):
     
     for i in range(num_images):
         status_text.text(f"Generating image {i+1}/{num_images}...")
-        image = generate_single_image(prompt, api_key, i+1)
+        image = generate_single_image(prompt, i+1)
         if image:
             images.append(image)
         progress_bar.progress((i + 1) / num_images)
@@ -68,13 +72,6 @@ def main():
         Transform your ideas into stunning images using state-of-the-art AI technology.
         Simply enter your prompt below and watch the magic happen!
     """)
-
-    # API key input (you might want to move this to secrets management)
-    api_key = st.sidebar.text_input(
-        "Enter Hugging Face API Key",
-        type="password",
-        help="Enter your Hugging Face API key. Get one at huggingface.co"
-    )
 
     # Initialize session state for storing generated images
     if 'generated_images' not in st.session_state:
@@ -100,16 +97,13 @@ def main():
 
     # Handle form submission
     if submit_button:
-        if not api_key:
-            st.error("Please enter your Hugging Face API key in the sidebar.")
-        elif not input_text:
+        if not input_text:
             st.warning("Please enter a prompt to generate images.")
         else:
             try:
                 with st.spinner("🎨 Creating your masterpiece..."):
                     st.session_state.generated_images = generate_images(
                         input_text,
-                        api_key,
                         num_images
                     )
             except Exception as e:
@@ -123,7 +117,11 @@ def main():
         cols = st.columns(2)
         for idx, image in enumerate(st.session_state.generated_images):
             with cols[idx % 2]:
-                st.image(image, caption=f"Variation {idx+1}", use_column_width=True)
+                st.image(
+                    image, 
+                    caption=f"Variation {idx+1}", 
+                    use_container_width=True  # Updated from use_column_width
+                )
                 
                 # Create download button for each image
                 img_bytes = BytesIO()
