@@ -131,7 +131,7 @@ def generate_images(prompt, aspect_ratio, num_images=4):
 
 def main():
     st.title("Dreampixel")
-    st.markdown("Your Gateway To Limitless Visual Creativity!")
+    st.title("Your Gateway To Limitless Visual Creativity!")
     st.markdown("""
         Transform your ideas into stunning images using state-of-the-art AI technology.
         Simply enter your prompt below and watch the magic happen!
