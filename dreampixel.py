@@ -8,7 +8,6 @@ import json
 # Configure page settings
 st.set_page_config(
     page_title="Dreampixel: AI Image Generator",
-    page_icon="🎨",
     layout="wide"
 )
 
@@ -131,7 +130,7 @@ def generate_images(prompt, aspect_ratio, num_images=4):
     return images
 
 def main():
-    st.title("🎨 Dreampixel: Your Gateway To Limitless Visual Creativity!")
+    st.title("Dreampixel: Your Gateway To Limitless Visual Creativity!")
     st.markdown("""
         Transform your ideas into stunning images using state-of-the-art AI technology.
         Simply enter your prompt below and watch the magic happen!
@@ -157,15 +156,9 @@ def main():
         num_images = st.slider("Number of variations", min_value=1, max_value=4, value=2)
 
         # Add quality hint
-        st.markdown("""
-            <div class="aspect-ratio-box">
-                💡 Images will be generated in high quality with the selected aspect ratio.
-                For best results, consider the chosen dimensions in your prompt description.
-            </div>
-        """, unsafe_allow_html=True)
-
+        
         submit_button = st.form_submit_button(
-            label='🎨 Generate Images',
+            label='Generate Images',
             use_container_width=True
         )
 
@@ -174,7 +167,7 @@ def main():
             st.warning("Please enter a prompt to generate images.")
         else:
             try:
-                with st.spinner("🎨 Creating your masterpiece... This might take a minute."):
+                with st.spinner("Creating your masterpiece... This might take a minute."):
                     st.session_state.generated_images = generate_images(
                         input_text,
                         aspect_ratio,
@@ -198,7 +191,7 @@ def main():
                 img_bytes = BytesIO()
                 image.save(img_bytes, format='PNG')
                 st.download_button(
-                    label=f"📥 Download Variation {idx+1}",
+                    label=f"Download Variation {idx+1}",
                     data=img_bytes.getvalue(),
                     file_name=f"dreampixel_generation_{idx+1}.png",
                     mime="image/png",
