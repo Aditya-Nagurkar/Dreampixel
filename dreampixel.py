@@ -39,7 +39,7 @@ st.markdown("""
 # Aspect ratio configurations
 ASPECT_RATIOS = {
     "Square (1:1)": (1024, 1024),
-    "Landscape (16:9)": (3840, 2160),
+    "Landscape (16:9)": (1024, 576),
     "Portrait (9:16)": (576, 1024),
     "Widescreen (21:9)": (1024, 440),
     "Classic (4:3)": (1024, 768)
