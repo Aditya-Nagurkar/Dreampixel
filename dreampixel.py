@@ -5,17 +5,14 @@ from io import BytesIO
 import time
 import json
 
-# Configure page settings
 st.set_page_config(
     page_title="Dreampixel: AI Image Generator",
     layout="wide"
 )
 
-# API Configuration
 API_KEY = "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"
 API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
 
-# Custom CSS to improve the UI
 st.markdown("""
     <style>
         .stButton > button {
@@ -36,17 +33,16 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Aspect ratio configurations
 ASPECT_RATIOS = {
     "Square (1:1)": (1024, 1024),
     "Landscape (16:9)": (1024, 576),
     "Portrait (9:16)": (576, 1024),
     "Widescreen (21:9)": (1024, 440),
-    "Classic (4:3)": (1024, 768)
+    "Classic (4:3)": (1024, 768),
+    "Tall (9:21)": (436, 1024)
 }
 
 def query_api_with_retry(payload, max_retries=5, initial_wait=5):
-    """Query the API with retry logic for rate limits"""
     headers = {"Authorization": f"Bearer {API_KEY}"}
 
     for attempt in range(max_retries):
@@ -91,16 +87,14 @@ def query_api_with_retry(payload, max_retries=5, initial_wait=5):
 
 @st.cache_data(ttl=3600, show_spinner=False)
 def generate_single_image(prompt, variation_number, width, height):
-    """Generate a single image with specified dimensions and improved quality"""
     try:
-        # Enhanced payload with quality parameters
         payload = {
             "inputs": f"{prompt} Variation {variation_number}",
             "parameters": {
                 "width": width,
                 "height": height,
-                "num_inference_steps": 50,  # Increased for better quality
-                "guidance_scale": 7.5,      # Fine-tuned guidance scale
+                "num_inference_steps": 50,
+                "guidance_scale": 7.5,
                 "negative_prompt": "blurry, low quality, distorted, deformed",
             }
         }
@@ -111,7 +105,6 @@ def generate_single_image(prompt, variation_number, width, height):
         return None
 
 def generate_images(prompt, aspect_ratio, num_images=4):
-    """Generate multiple images with progress tracking"""
     width, height = ASPECT_RATIOS[aspect_ratio]
     images = []
     progress_bar = st.progress(0)
@@ -146,7 +139,6 @@ def main():
             help="Be specific and descriptive for better results"
         )
 
-        # Add aspect ratio selector
         aspect_ratio = st.selectbox(
             "Choose aspect ratio",
             options=list(ASPECT_RATIOS.keys()),
@@ -155,8 +147,6 @@ def main():
 
         num_images = st.slider("Number of variations", min_value=1, max_value=4, value=2)
 
-        # Add quality hint
-        
         submit_button = st.form_submit_button(
             label='Generate Images',
             use_container_width=True
@@ -191,7 +181,7 @@ def main():
                 img_bytes = BytesIO()
                 image.save(img_bytes, format='PNG')
                 st.download_button(
-                    label=f"Download Variation {idx+1}",
+                    label="Download",
                     data=img_bytes.getvalue(),
                     file_name=f"dreampixel_generation_{idx+1}.png",
                     mime="image/png",
