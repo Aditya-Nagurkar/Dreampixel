@@ -10,11 +10,7 @@ st.set_page_config(
     layout="wide"
 )
 
-import os
-from dotenv import load_dotenv
-
-load_dotenv()
-API_KEY = os.getenv("HF_API_KEY")
+API_KEY = "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"
 API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
 
 st.markdown("""
@@ -43,7 +39,7 @@ ASPECT_RATIOS = {
     "Portrait (9:16)": (576, 1024),
     "Widescreen (21:9)": (1024, 440),
     "Classic (4:3)": (1024, 768),
-    "Tall (9:21)": (448, 1024)  # Adjusted width to be multiple of 8
+    "Tall (9:21)": (436, 1024)
 }
 
 def query_api_with_retry(payload, max_retries=5, initial_wait=5):
