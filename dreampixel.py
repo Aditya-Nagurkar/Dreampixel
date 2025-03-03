@@ -11,7 +11,7 @@ st.set_page_config(
 )
 
 API_KEY = "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"
-API_URL = "https://api.segmind.com/v1/stable-diffusion-3.5-large-txt2img"
+API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-3.5-medium"
 
 st.markdown("""
     <style>
