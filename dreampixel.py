@@ -104,6 +104,24 @@ def generate_single_image(prompt, variation_number, width, height):
         st.error(f"Error generating image {variation_number}: {str(e)}")
         return None
 
+def generate_images(prompt, aspect_ratio, num_images=4):
+    width, height = ASPECT_RATIOS[aspect_ratio]
+    images = []
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+
+    for i in range(num_images):
+        status_text.text(f"Generating image {i+1}/{num_images}...")
+        image = generate_single_image(prompt, i+1, width, height)
+        if image:
+            images.append(image)
+        progress_bar.progress((i + 1) / num_images)
+        time.sleep(2)
+
+    status_text.empty()
+    progress_bar.empty()
+    return images
+
 def main():
     st.title("Dreampixel: Your Gateway To Limitless Visual Creativity!")
     st.markdown("""
@@ -111,15 +129,8 @@ def main():
         Simply enter your prompt below and watch the magic happen!
     """)
 
-    # Initialize session state variables
     if 'generated_images' not in st.session_state:
-        st.session_state.generated_images = []
-    if 'current_image_index' not in st.session_state:
-        st.session_state.current_image_index = 0
-    if 'generation_complete' not in st.session_state:
-        st.session_state.generation_complete = False
-    if 'generating' not in st.session_state:
-        st.session_state.generating = False
+        st.session_state.generated_images = None
 
     with st.form(key='image_generation_form'):
         input_text = st.text_input(
@@ -145,85 +156,37 @@ def main():
         if not input_text:
             st.warning("Please enter a prompt to generate images.")
         else:
-            # Reset state for new generation
-            st.session_state.generated_images = []
-            st.session_state.current_image_index = 0
-            st.session_state.generation_complete = False
-            st.session_state.generating = True
-            st.session_state.num_images_to_generate = num_images
-            st.session_state.prompt = input_text
-            st.session_state.selected_aspect_ratio = aspect_ratio
+            try:
+                with st.spinner("Creating your masterpiece... This might take a minute."):
+                    st.session_state.generated_images = generate_images(
+                        input_text,
+                        aspect_ratio,
+                        num_images
+                    )
+            except Exception as e:
+                st.error(f"An unexpected error occurred: {str(e)}")
 
-    # Create placeholders for progress and images
-    progress_container = st.empty()
-    status_text = st.empty()
-    image_container = st.container()
-    
-    # Generate images sequentially
-    if st.session_state.generating and len(st.session_state.generated_images) < st.session_state.num_images_to_generate:
-        with progress_container:
-            progress = st.progress((len(st.session_state.generated_images)) / st.session_state.num_images_to_generate)
-        
-        current_index = len(st.session_state.generated_images) + 1
-        status_text.text(f"Generating image {current_index}/{st.session_state.num_images_to_generate}...")
-        
-        width, height = ASPECT_RATIOS[st.session_state.selected_aspect_ratio]
-        
-        try:
-            new_image = generate_single_image(
-                st.session_state.prompt, 
-                current_index, 
-                width, 
-                height
-            )
-            
-            if new_image:
-                st.session_state.generated_images.append(new_image)
-                st.session_state.current_image_index = len(st.session_state.generated_images) - 1
-                
-                # Check if generation is complete
-                if len(st.session_state.generated_images) == st.session_state.num_images_to_generate:
-                    st.session_state.generation_complete = True
-                    st.session_state.generating = False
-                    progress_container.empty()
-                    status_text.empty()
-                
-                # Force rerun to continue generation
-                if not st.session_state.generation_complete:
-                    time.sleep(2)  # Brief pause between generations
-                    st.experimental_rerun()
-                    
-        except Exception as e:
-            st.error(f"An unexpected error occurred: {str(e)}")
-            st.session_state.generating = False
-            progress_container.empty()
-            status_text.empty()
-    
-    # Display generated images
     if st.session_state.generated_images:
-        with image_container:
-            st.subheader("Generated Images")
-            
-            # Display images sequentially
-            for idx, image in enumerate(st.session_state.generated_images):
+        st.subheader("Generated Images")
+
+        cols = st.columns(2)
+        for idx, image in enumerate(st.session_state.generated_images):
+            with cols[idx % 2]:
                 st.image(
                     image,
                     caption=f"Variation {idx+1}",
                     use_container_width=True
                 )
-                
+
                 img_bytes = BytesIO()
                 image.save(img_bytes, format='PNG')
                 st.download_button(
-                    label=f"Download Variation {idx+1}",
+                    label="Download",
                     data=img_bytes.getvalue(),
                     file_name=f"dreampixel_generation_{idx+1}.png",
                     mime="image/png",
                     key=f"download_{idx}"
                 )
-                
-                # Add some spacing between images
-                st.markdown("<hr>", unsafe_allow_html=True)
 
 if __name__ == "__main__":
     main()
