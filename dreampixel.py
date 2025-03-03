@@ -11,7 +11,8 @@ st.set_page_config(
 )
 
 API_KEY = "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"
-API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-3.5-medium"
+API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-3.5-medium
+``"
 
 st.markdown("""
     <style>
