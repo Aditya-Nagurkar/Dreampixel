@@ -10,7 +10,11 @@ st.set_page_config(
     layout="wide"
 )
 
-API_KEY = "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"
+import os
+import streamlit as st
+
+# Try to get API key from Streamlit secrets or environment variable
+API_KEY = st.secrets.get("HF_API_KEY", os.environ.get("HF_API_KEY", ""))
 API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0"
 
 st.markdown("""
@@ -39,7 +43,7 @@ ASPECT_RATIOS = {
     "Portrait (9:16)": (576, 1024),
     "Widescreen (21:9)": (1024, 440),
     "Classic (4:3)": (1024, 768),
-    "Tall (9:21)": (436, 1024)
+    "Tall (9:21)": (448, 1024)  # Adjusted width to be multiple of 8
 }
 
 def query_api_with_retry(payload, max_retries=5, initial_wait=5):
@@ -109,14 +113,36 @@ def generate_images(prompt, aspect_ratio, num_images=4):
     images = []
     progress_bar = st.progress(0)
     status_text = st.empty()
-
+    
+    # Create placeholders for the images
+    image_placeholders = []
+    cols = st.columns(2)
+    for i in range(num_images):
+        with cols[i % 2]:
+            image_placeholders.append(st.empty())
+    
     for i in range(num_images):
         status_text.text(f"Generating image {i+1}/{num_images}...")
         image = generate_single_image(prompt, i+1, width, height)
+        
         if image:
             images.append(image)
+            # Display the image as soon as it's generated
+            with image_placeholders[i].container():
+                st.image(image, caption=f"Variation {i+1}", use_container_width=True)
+                
+                # Prepare download button (will be replaced in the final display)
+                img_bytes = BytesIO()
+                image.save(img_bytes, format='PNG')
+                st.download_button(
+                    label="Download",
+                    data=img_bytes.getvalue(),
+                    file_name=f"dreampixel_generation_{i+1}.png",
+                    mime="image/png",
+                    key=f"temp_download_{i}"
+                )
+                
         progress_bar.progress((i + 1) / num_images)
-        time.sleep(2)
 
     status_text.empty()
     progress_bar.empty()
@@ -168,25 +194,8 @@ def main():
 
     if st.session_state.generated_images:
         st.subheader("Generated Images")
-
-        cols = st.columns(2)
-        for idx, image in enumerate(st.session_state.generated_images):
-            with cols[idx % 2]:
-                st.image(
-                    image,
-                    caption=f"Variation {idx+1}",
-                    use_container_width=True
-                )
-
-                img_bytes = BytesIO()
-                image.save(img_bytes, format='PNG')
-                st.download_button(
-                    label="Download",
-                    data=img_bytes.getvalue(),
-                    file_name=f"dreampixel_generation_{idx+1}.png",
-                    mime="image/png",
-                    key=f"download_{idx}"
-                )
+        # Images are already displayed during generation, no need to redisplay them here
+        # This section is kept for final layout adjustments if needed
 
 if __name__ == "__main__":
     main()
